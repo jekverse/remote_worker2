@@ -32,9 +32,49 @@ A Flask-based web application for centrally managing and monitoring Modal worker
 
 ## 🚀 Quick Start
 
-### 1. Setup Environment Variables
+### 1. Create Virtual Environment
 
-The `.env` file is the **Single Source of Truth** for all credentials. Create/edit the `.env` file in the `host/` folder:
+```bash
+cd host
+
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+source venv/bin/activate
+```
+
+### 2. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Setup Modal Account
+
+Make sure you have a Modal account configured. Check if `~/.modal.toml` exists:
+
+```bash
+cat ~/.modal.toml
+```
+
+If not, run Modal setup:
+
+```bash
+modal setup
+```
+
+Follow the browser flow to authenticate your Modal account.
+
+### 4. Setup Environment Variables
+
+The `.env` file is the **Single Source of Truth** for all credentials. Create/edit the `.env` file:
+
+```bash
+nano .env
+```
+
+Fill in the following variables:
 
 ```env
 # Worker Authentication
@@ -61,7 +101,7 @@ CLOUDFLARED_TOKEN="your_modal_tunnel_token"
 SSH_KEY="ssh-ed25519 AAAA... user@hostname"
 ```
 
-### 2. Deploy Secrets to Modal
+### 5. Deploy Secrets to Modal
 
 Run the script to push secrets to Modal:
 
@@ -74,13 +114,23 @@ Verify:
 modal secret list
 ```
 
-### 3. Install Dependencies
+### 6. Install Cloudflared
+
+Install `cloudflared` for automatic tunneling:
 
 ```bash
-pip install -r requirements.txt
+# Add Cloudflare GPG key
+sudo mkdir -p --mode=0755 /usr/share/keyrings
+curl -fsSL https://pkg.cloudflare.com/cloudflare-public-v2.gpg | sudo tee /usr/share/keyrings/cloudflare-public-v2.gpg >/dev/null
+
+# Add Cloudflare repository
+echo 'deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main' | sudo tee /etc/apt/sources.list.d/cloudflared.list
+
+# Install cloudflared
+sudo apt-get update && sudo apt-get install cloudflared
 ```
 
-### 4. Run the Application
+### 7. Run the Application
 
 ```bash
 python app.py
@@ -147,6 +197,7 @@ host/
 
 ## 📝 Notes
 
-- Make sure `cloudflared` is installed for automatic tunneling
+- Always activate virtual environment before running: `source venv/bin/activate`
+- Run `bash create_modal_secret.sh` after changing `.env` to update Modal secrets
 - Internal worker is automatically active when the application runs
 - Default session timeout follows Flask session configuration
